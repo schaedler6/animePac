@@ -1,0 +1,50 @@
+name: generate pacman animation
+
+on:
+  schedule:
+    - cron: "0 */24 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create dist folder
+        run: mkdir -p dist
+
+      - name: Generate pacman svg
+        run: |
+          cat > dist/pacman.svg <<'EOF'
+          <svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+            <rect width="100%" height="100%" fill="black"/>
+            <circle cx="120" cy="100" r="12" fill="white"/>
+            <circle cx="180" cy="100" r="12" fill="white"/>
+            <circle cx="240" cy="100" r="12" fill="white"/>
+            <circle cx="300" cy="100" r="12" fill="white"/>
+            <path d="M100,100 L160,60 A70,70 0 1,1 160,140 Z" fill="yellow">
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                from="0 0"
+                to="500 0"
+                dur="4s"
+                repeatCount="indefinite"/>
+            </path>
+          </svg>
+          EOF
+
+      - name: Deploy to output branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: output
